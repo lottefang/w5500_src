@@ -1,0 +1,140 @@
+m255
+K3
+13
+cModel Technology
+Z0 dF:\project\FPGA\AD_DA_forprime\modelsim
+T_opt
+Z1 VXF9hW0ZR;6zCZ8;189@J<0
+Z2 04 3 4 work sim fast 0
+Z3 =1-d8cb8aef4b55-59fc7233-303-4580
+Z4 o-quiet -auto_acc_if_foreign -work work
+Z5 n@_opt
+Z6 OL;O;10.0c;49
+Z7 dF:\project\FPGA\AD_DA_forprime\modelsim
+vclk_divider
+Z8 IO58^N;Y`NJR[1L0GKHC^<2
+Z9 VJLhe8VlEKC;iDI=_=PU1Q0
+Z10 dF:\project\project\w5500\w5500_verilog_test\modelsim
+Z11 w1509700602
+Z12 8F:/project/project/w5500/w5500_verilog_test/source/clk_divider.v
+Z13 FF:/project/project/w5500/w5500_verilog_test/source/clk_divider.v
+L0 9
+Z14 OL;L;10.0c;49
+r1
+31
+Z15 !s102 -nocovercells
+Z16 o-work work -nocovercells -L mtiAvm -L mtiOvm -L mtiUvm -L mtiUPF
+Z17 !s100 dz`YHIZZEc[N_>^H8T?cI1
+Z18 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/source/clk_divider.v|
+Z19 !s108 1509716525.169000
+Z20 !s107 F:/project/project/w5500/w5500_verilog_test/source/clk_divider.v|
+!s85 0
+vsim
+Z21 IbYZlzK[OXzEM6PlSE>iKo1
+Z22 V^lFIGeJR6Lo[E6iNF_R4L3
+R10
+Z23 w1509716514
+Z24 8F:/project/project/w5500/w5500_verilog_test/source/sim.v
+Z25 FF:/project/project/w5500/w5500_verilog_test/source/sim.v
+L0 3
+R14
+r1
+31
+R15
+R16
+Z26 !s100 _eGO^V;kW]OoPQcUBIRae3
+Z27 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/source/sim.v|
+Z28 !s108 1509716525.354000
+Z29 !s107 F:/project/project/w5500/w5500_verilog_test/source/sim.v|
+!s85 0
+vspi_control
+Z30 I6K7T[hcfFjC6:]R^ok;7b1
+Z31 V28;deCH``H290Z8_z><FA2
+R10
+Z32 w1509716014
+Z33 8F:/project/project/w5500/w5500_verilog_test/source/spi_control.v
+Z34 FF:/project/project/w5500/w5500_verilog_test/source/spi_control.v
+L0 11
+R14
+r1
+31
+R15
+R16
+Z35 !s100 FZaSFb[_3]@k2@3?mH6g=1
+Z36 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/source/spi_control.v|
+!s85 0
+Z37 !s108 1509716526.181000
+Z38 !s107 F:/project/project/w5500/w5500_verilog_test/source/spi_control.v|
+vspi_master
+Z39 Ik^5@5SnAk^gGcAQo=BIog0
+Z40 Vk1eK32T^hBBUfaMDG:1DB0
+R10
+Z41 w1450287590
+Z42 8F:/project/project/w5500/w5500_verilog_test/source/spi_master.v
+Z43 FF:/project/project/w5500/w5500_verilog_test/source/spi_master.v
+L0 50
+R14
+r1
+31
+R15
+R16
+Z44 !s100 =14o9f6>f?k8K@HVbIolc3
+Z45 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/source/spi_master.v|
+Z46 !s108 1509716525.555000
+Z47 !s107 F:/project/project/w5500/w5500_verilog_test/source/spi_master.v|
+!s85 0
+vspi_slave
+Z48 I77QabKYB2JzDIi@2_<ic<1
+Z49 V;?21ZDi1?T@1POK68EXeN2
+R10
+R41
+Z50 8F:/project/project/w5500/w5500_verilog_test/source/spi_slave.v
+Z51 FF:/project/project/w5500/w5500_verilog_test/source/spi_slave.v
+L0 46
+R14
+r1
+31
+R15
+R16
+Z52 !s100 NGG^Tng^@@`:f5Gl=8>k83
+Z53 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/source/spi_slave.v|
+Z54 !s108 1509716525.757000
+Z55 !s107 F:/project/project/w5500/w5500_verilog_test/source/spi_slave.v|
+!s85 0
+vTB_SPI_MasSlv
+Z56 IbhFV@RgnGMN>Xb;KlG0f[0
+Z57 V1Kdo?53Tn^`QQ89VTm>K11
+R10
+R41
+Z58 8F:/project/project/w5500/w5500_verilog_test/source/TB_SPI_MasSlv.v
+Z59 FF:/project/project/w5500/w5500_verilog_test/source/TB_SPI_MasSlv.v
+L0 44
+R14
+r1
+31
+R15
+R16
+Z60 n@t@b_@s@p@i_@mas@slv
+Z61 !s100 A]3ded6g2KkI5mSKJK]zT1
+Z62 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/source/TB_SPI_MasSlv.v|
+Z63 !s108 1509716525.912000
+Z64 !s107 F:/project/project/w5500/w5500_verilog_test/source/TB_SPI_MasSlv.v|
+!s85 0
+vtop_module
+Z65 IES0J:><JcB<ccTVN<NaZ73
+Z66 Vn8[GYaGQYnmdjj9km^B6A3
+R10
+Z67 w1509715720
+Z68 8F:\project\project\w5500\w5500_verilog_test\source\top_module.v
+Z69 FF:\project\project\w5500\w5500_verilog_test\source\top_module.v
+L0 1
+R14
+r1
+31
+R15
+R16
+Z70 !s100 FOBHg]c=STXJ[[Q>?MSfV0
+Z71 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:\project\project\w5500\w5500_verilog_test\source\top_module.v|
+Z72 !s108 1509716526.045000
+Z73 !s107 F:\project\project\w5500\w5500_verilog_test\source\top_module.v|
+!s85 0
