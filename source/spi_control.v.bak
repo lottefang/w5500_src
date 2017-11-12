@@ -2,34 +2,33 @@
  * @Author: cuidajun 
  * @Date: 2017-11-03 17:17:21 
  * @Last Modified by: cuidajun
- * @Last Modified time: 2017-11-03 21:16:47
+ * @Last Modified time: 2017-11-03 22:25:28
  * @Description:  
  */
 
 
 
-module spi_master(rstn,clk,txdata,din,dout,cs,sck,rxdata);
+module spi_control(rstn,clk,txdata,din,dout,cs,sck,rxdata)/*synthesis noprune*/;
     input rstn,clk;
     input [7:0] txdata;  //transmit data
  
 	input din;
-	output reg cs; 
-	output reg sck; 
-	output reg dout; 
-	output reg [7:0] rxdata; //received data
+	output  reg cs; 
+	output  sck; 
+	output  dout; 
+	output  [7:0] rxdata; //received data
 
-parameter idle=0,finish=4;	
+
+parameter fsm_idle = 8'd0,fsm_set_cnt = 8'd1, fsm_set_index = 8'd2 , fsm_send_start = 8'd3, 
+fsm_send_wait = 8'd4, fsm_send_end = 8'd5 , fsm_finish = 8'd6;
+reg [8:0] cur=fsm_finish,nxt=fsm_idle;
 
 wire [7:0] treg;
-
-parameter bitl = 7;  
-reg [bitl:0] cur,nxt;
-
-reg [bitl:0] cnt=0,index=0;
+reg [7:0] cnt=0,index=0;
 
 reg [7:0] mem[255:0];
 initial begin
-    mem[0]<=6'd4;
+    mem[0]<=8'd4;
     mem[1]<=8'h00;
     mem[2]<=8'h2e ;
     mem[3]<=8'h01 ;
@@ -39,6 +38,7 @@ initial begin
     mem[7]<=8'h2e ;
     mem[8]<=8'h01 ;
     mem[9]<=8'h00 ;
+    index <=0;
 
 end
 
@@ -46,68 +46,89 @@ end
 assign treg = mem[index];
 wire done;
 reg start=0;
-wire rreg[7:0];
+reg index_add_flag;
 always @(cur or done ) begin
-    $display("FSM judge");
+    //$display("FSM judge");
 		 nxt=cur;
+         start = 1'b0;
+         cs  = 1'b0;
 		 case(cur)
-			0:begin //idle
-				nxt = 1 ;
-                start = 0;
+			fsm_idle:begin //idle
+				nxt = fsm_set_cnt ;
+                
             end
-			1:begin //ready to  send spi data block
-                cnt = index + mem[index];//num of this data block
-                cs = 1'b0; //change cs to enable spi slave
-                index = index+1; //load 1st data
-                nxt = 2;              
+			fsm_set_cnt:begin //ready to  send spi data block
+                //cnt = index + mem[index];//num of this data block
+                cs=1'b1;
+               
+                nxt = fsm_set_index;              
 			end//send
-            2:begin //start send
-                $display("send data:%h",treg[index]);
-                start = 1'b0;
-                nxt = 3;
+            fsm_set_index:begin
+                cur = fsm_send_start;
+            end
+            fsm_send_start:begin //start send
+                $display("send data:%h",treg);
+                start = 1'b1;
+                nxt = fsm_send_wait;
                 end
-            3:begin //wait for data send done
-                if (done) begin
-                    if (index < cnt) begin
-                        nxt = 2; //block not end ,send next data
-                    end else begin
-                        if (index<9)//send next blcok
-                        begin
-                            nxt = 1;
-                        end else begin //all data block send done
-                            nxt = 4;
-                        end
+            fsm_send_wait:begin
+                if (done) nxt =fsm_send_end;
+            end
+            fsm_send_end:begin //wait for data send done
+                
+                if (index < cnt) begin
+                    nxt = fsm_set_index; //block not end ,send next data
+                end else begin
+                    if (index<9)//send next blcok
+                    begin
+                        nxt = fsm_set_cnt;
+                        cs = 1'b1;
+                    end else begin //all data block send done
+                        nxt = fsm_finish;
+                        cs = 1'b1;
                     end
                 end
-                index = index +1;
+                    
+                    
+                
             end
-			finish:begin
-                nxt = 0;
+            
+			fsm_finish:begin
+                nxt = fsm_idle;
+
             end
-			default: nxt=0;
+			default: nxt=fsm_idle;
       endcase
     end//always
 
 //state transistion
 always@(negedge clk or negedge rstn) begin
  if(rstn==0) 
-   cur<=finish;
- else 
-   cur<=nxt;
+   cur<=0;
+ else begin
+    cur<=nxt;
+    case (cur)
+      fsm_set_cnt: cnt <= cnt+1'b1;
+      fsm_set_index:index <= index + 1'b1;
+      fsm_finish: index<= 0; 
+      default: 
+    endcase
+   end
  end
+wire[7:0] rreg;
 spi_master spi_inst(
     .rstb(rstn),
     .clk(clk),
     .mlb(1'b1),
     .start(start),
     .tdat(treg),
-    .cdiv(2'b1),
+    .cdiv(2'b0),
     .din(din), 
     .ss(),
     .sck(sck),
     .dout(dout),
     .done(done),
-    .rdata(rreg)
+    .rdata(rxdata)
 );
 
 

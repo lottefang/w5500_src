@@ -1,0 +1,88 @@
+Read_W5500_1Byte
+**spi send 0x00
+**spi send 0x2e
+**spi send 0x01
+**spi send 0x00
+try attach w5500:186
+set geteway ip
+Write_W5500_nByte
+**spi send 0x00
+**spi send 0x01
+**spi send 0x04
+**spi send 0xc0
+**spi send 0xa8
+**spi send 0x01
+**spi send 0x01
+set sub_mask
+Write_W5500_nByte
+**spi send 0x00
+**spi send 0x05
+**spi send 0x04
+**spi send 0xff
+**spi send 0xff
+**spi send 0xff
+**spi send 0x00
+set phy_addr
+Write_W5500_nByte
+**spi send 0x00
+**spi send 0x09
+**spi send 0x04
+**spi send 0x0c
+**spi send 0x29
+**spi send 0xab
+**spi send 0x7c
+**spi send 0x00
+**spi send 0x01
+set local ip
+Write_W5500_nByte
+**spi send 0x00
+**spi send 0x0f
+**spi send 0x04
+**spi send 0xc0
+**spi send 0xa8
+**spi send 0x01
+**spi send 0xc7
+set tx rx memory size 
+Write_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x1e
+**spi send 0x0d
+**spi send 0x02
+Write_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x1f
+**spi send 0x0d
+**spi send 0x02
+w5500 init success
+w5500 Gateway detected
+set socket0 port 
+Write_W5500_SOCK_2Byte
+**spi send 0x00
+**spi send 0x12
+**spi send 0x0e
+**spi send 0x05
+**spi send 0xb4
+Write_W5500_SOCK_2Byte
+**spi send 0x00
+**spi send 0x04
+**spi send 0x0e
+**spi send 0x13
+**spi send 0x88
+start UDP
+Write_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x00
+**spi send 0x0d
+**spi send 0x02
+Write_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x01
+**spi send 0x0d
+**spi send 0x01
+w5500 socket0 init success
+Read_W5500_1Byte
+**spi send 0x00
+**spi send 0x17
+**spi send 0x01
+**spi send 0x00
+all end

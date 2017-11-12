@@ -1,4 +1,0 @@
-<module:Assembler>
-</module:Assembler>
-<module:TimeQuest Timing Analyzer>
-</module:TimeQuest Timing Analyzer>
