@@ -43,13 +43,21 @@ output  reg busy,busy_tx,busy_rx;
 output  reg clk_source;
 input       clk_sink;
 
-parameter fsm_idle = 8'd0,fsm_set_cnt = 8'd1, fsm_set_index = 8'd2 , fsm_send_start = 8'd3, 
-fsm_send_wait = 8'd4, fsm_send_end = 8'd5 , fsm_finish = 8'd6,fsm_send_wait_2 =8'd7;
-reg [8:0] cur=fsm_idle,nxt=fsm_idle;
+parameter   spi_fsm_idle        =   8'd0,
+            spi_fsm_set_cnt     =   8'd1,
+            spi_fsm_set_ptr     =   8'd2,
+            spi_fsm_set_tx_data =   8'd3,
+            spi_fsm_spi_start   =   8'd4,
+            spi_fsm_spi_wait    =   8'd5,
+            spi_fsm_cnt_minus   =   8'd6,
+            spi_fsm_1_byte_fini =   8'd7,
+            spi_fsm_1_block_fini=   8'd8,
+            spi_fsm_finish      =   8'd9;
+reg [8:0] cur=spi_fsm_idle,nxt=spi_fsm_idle;
 
 parameter init_reg_num = 84;
 
-wire [7:0] treg;
+reg [7:0] treg;
 reg [7:0] cnt=0,index=0;
 
 reg [7:0] mem[255:0];
@@ -58,89 +66,136 @@ reg init_done = 1'b0;
 always @(posedge clk or negedge rstn) begin
   if(!rstn) 
     init_done<=1'b0;
-  else if(index == init_reg_num) 
+  else if ((index == init_reg_num) &&( cur == spi_fsm_1_byte_fini )) 
     init_done <= 1'b1;
 end
 
+//-----spi要发送de数据
+always @(index) begin
+  treg  = mem[index];
+end
 
-//FSM i/o
-assign treg = mem[index];
-wire done;
+//spi 状态机状态转换
+wire spi_done;
 reg start=0;
 reg index_add_flag;
-always @(cur or done ) begin
-    //$display("FSM judge");
-		 nxt=cur;
-         start = 1'b0;
-         cs  = 1'b0;
-		 case(cur)
-			fsm_idle:begin //idle
-				nxt = fsm_set_cnt ;
-                
-            end
-			fsm_set_cnt:begin //ready to  send spi data block
-                //cnt = index + mem[index];//num of this data block
-                cs=1'b1;
-               
-                nxt = fsm_set_index;              
-			end//send
-            fsm_set_index:begin
-                nxt = fsm_send_start;
-            end
-            fsm_send_start:begin //start send
-                $display("send data:%h",treg);
-                start = 1'b1;
-                nxt = fsm_send_wait;
+always @(cur or init_done or spi_done) 
+    begin
+        nxt=cur;
+        case(cur)
+            spi_fsm_idle:
+                begin
+                if (!init_done) nxt = spi_fsm_set_cnt ;
                 end
-            fsm_send_wait:begin
-                if (done) nxt =fsm_send_wait_2;
-            end
-            fsm_send_wait_2:begin
-              nxt = fsm_send_end;
-            end
-            fsm_send_end:begin //wait for data send done
-                
-                if (index < cnt) begin
-                    nxt = fsm_set_index; //block not end ,send next data
-                end else begin
-                    if (index<init_reg_num)//send next blcok
-                    begin
-                        nxt = fsm_set_cnt;
-                        cs = 1'b1;
-                    end else begin //all data block send done
-                        nxt = fsm_finish;
-                        cs = 1'b1;
-                    end
-                end                    
-            end
-            
-			fsm_finish:begin
-                nxt = fsm_finish;
-					 cs=1'b1;
-
-            end
-			default: nxt=fsm_idle;
-      endcase
+            spi_fsm_set_cnt:
+                begin
+                  nxt   =  spi_fsm_set_ptr ;
+                end
+            spi_fsm_set_ptr :
+                begin
+                  nxt   =   spi_fsm_set_tx_data;
+                end     
+            spi_fsm_set_tx_data :
+                begin
+                  nxt = spi_fsm_spi_start; 
+                end
+            spi_fsm_spi_start  :
+                begin
+                  nxt = spi_fsm_spi_wait;
+                end 
+            spi_fsm_spi_wait   :
+                begin
+                  if (spi_done) nxt = spi_fsm_cnt_minus;
+                end
+            spi_fsm_cnt_minus   :
+                begin
+                    nxt = spi_fsm_1_byte_fini;
+                end
+            spi_fsm_1_byte_fini:
+                begin
+                    if  (cnt == 0) 
+                        nxt = spi_fsm_1_block_fini; 
+                    else 
+                        nxt = spi_fsm_set_ptr;
+                end
+            spi_fsm_1_block_fini:
+                begin
+                    if  (!init_done) 
+                        nxt = spi_fsm_set_cnt;
+                    else 
+                        nxt = spi_fsm_finish;
+                end
+            spi_fsm_finish :
+                begin
+                    nxt = spi_fsm_idle;
+                end    
+            default: nxt=spi_fsm_idle;
+        endcase
     end//always
 
-//state transistion
+//-------spi状态机
 always@(posedge clk or negedge rstn) begin
- if(rstn==0) begin
-   cur<=0;
-   index<=0;
-   cnt<=0;
- end 
- else begin
-    
+    if(!rstn) 
+        cur<=spi_fsm_idle; 
+    else begin
+        cur<=nxt;
+    end
+end
+
+//----spi 一个数据帧的个数 cnt
+always@(posedge clk or negedge rstn) begin
+    if(!rstn) 
+        cnt<=0;
+    else 
     case (cur)
-      fsm_set_cnt: begin cnt <= index + mem[index]; index <= index+1'b1; end 
-      fsm_send_wait_2:index <= index + 1'b1;
-      fsm_finish: index<= 0; 
-      
+        spi_fsm_set_cnt:    
+            if (!init_done) cnt <= mem[index]-1'b1;
+        spi_fsm_cnt_minus:
+            if (!init_done) cnt <= cnt -1'b1;
     endcase
-    cur<=nxt;
-   end
- end
+end
+
+//-----spi index 
+always@(posedge clk or negedge rstn) begin
+    if(!rstn) 
+        index<=0;
+    else 
+    case(cur)
+        spi_fsm_set_ptr:
+            begin
+                if (!init_done) index <= index +1'b1;
+            end
+        spi_fsm_1_block_fini:
+            begin
+                if(!init_done)  index <= index +1'b1;
+            end
+    endcase
+end
+
+//------w5500 cs
+always@(posedge clk or negedge rstn) begin
+    if(!rstn) 
+        cs<=1'b1;
+    else 
+    case (cur)
+        spi_fsm_set_cnt:    cs<=1'b0;
+        spi_fsm_1_block_fini: cs<=1'b1;
+    endcase
+end
+
+//-----spi start signal
+reg  spi_start;
+always@(posedge clk or negedge rstn) begin
+    if(!rstn) 
+        spi_start = 1'b0;
+    else 
+  case (cur)
+        spi_fsm_spi_start: 
+            if (!init_done) spi_start <= 1'b1; 
+        spi_fsm_spi_wait: spi_start <=1'b0;
+  endcase
+end
+
 wire[7:0] rreg;
 wire [31:0]mspi_rdata;
 wire mspi_ready;
@@ -149,9 +204,9 @@ mspi mspi_inst(
 					.clk(clk),		// global clock
 					.rst(~rstn),		// global async low reset
 					.clk_div(4),	// spi clock divider
-					.wr(start),			// spi write/read
+					.wr(spi_start),			// spi write/read
 					.wr_len(2'd0),		// spi write or read byte number
-					.wr_done(done),	// write done /read done
+					.wr_done(spi_done),	// write done /read done
 					.wrdata({treg,24'd0}),		// spi write data, ??Чλ??wr_len?й????8λ????16λ?????32λ 
 					.rddata(mspi_rdata),		// spi recieve data, valid when wr_done assert??Чλ??wr_len?й????8λ????16λ?????32λ 
 					.sck(sck),		// spi master clock out 
@@ -162,7 +217,7 @@ mspi mspi_inst(
 					);
 
 initial begin
-//每行配置的前4位是一字节的总数，两字节地址，一字节控制，后面的字节是具体配置参数
+//每行配置的前4位是一字节总数，两字节地址，一字节控制，后面的字节是具体配置参数
 
 mem[0]<=8'd5;  mem[1]<=8'h00;  mem[2]<=8'h2e;  mem[3]<=8'h01;  mem[4]<=8'h00;
 //查询是否接入互联网（插网线了没，如果没有，我也没处理。。。）

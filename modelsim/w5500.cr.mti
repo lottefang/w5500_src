@@ -1,9 +1,5 @@
-F:/project/project/w5500/w5500_verilog_test/w5500_src/source/top_module.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/top_module.v
+F:/project/project/w5500/w5500_verilog_test/w5500_src/source/w5500_reg_define.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/w5500_reg_define.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
--- Compiling module top_module
-
-Top level modules:
-	top_module
 
 } {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/clk_divider.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/clk_divider.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
@@ -12,15 +8,12 @@ Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
 Top level modules:
 	clk_divider
 
-} {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/w5500_reg_define.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/w5500_reg_define.v
+} {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/top_module.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/top_module.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
-
-} {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/sim.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/sim.v
-Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
--- Compiling module sim
+-- Compiling module top_module
 
 Top level modules:
-	sim
+	top_module
 
 } {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/mspi.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/mspi.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
@@ -29,12 +22,12 @@ Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
 Top level modules:
 	mspi
 
-} {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_slave.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_slave.v
+} {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/sim.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/sim.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
--- Compiling module spi_slave
+-- Compiling module sim
 
 Top level modules:
-	spi_slave
+	sim
 
 } {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/TB_SPI_MasSlv.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/TB_SPI_MasSlv.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
@@ -42,6 +35,13 @@ Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
 
 Top level modules:
 	TB_SPI_MasSlv
+
+} {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_slave.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_slave.v
+Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
+-- Compiling module spi_slave
+
+Top level modules:
+	spi_slave
 
 } {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_master.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_master.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
