@@ -1,9 +1,10 @@
+start
 Read_W5500_1Byte
 **spi send 0x00
 **spi send 0x2e
 **spi send 0x01
 **spi send 0x00
-try attach w5500:186
+try attach w5500:191
 set geteway ip
 Write_W5500_nByte
 **spi send 0x00
@@ -79,10 +80,19 @@ Write_W5500_SOCK_1Byte
 **spi send 0x01
 **spi send 0x0d
 **spi send 0x01
-w5500 socket0 init success
-Read_W5500_1Byte
+set UDP destination ip and port 
+Write_W5500_SOCK_4Byte
 **spi send 0x00
-**spi send 0x17
+**spi send 0x0c
+**spi send 0x0f
+**spi send 0xc0
+**spi send 0xa8
 **spi send 0x01
+**spi send 0xbe
+Write_W5500_SOCK_2Byte
 **spi send 0x00
-all end
+**spi send 0x10
+**spi send 0x0e
+**spi send 0x17
+**spi send 0x70
+end

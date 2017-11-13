@@ -7,10 +7,12 @@ try:
 except OSError:
     pass
 output_path='F:\project\project\w5500\w5500_verilog_test\w5500_src\source'
-wf = open('output.txt', 'w',encoding='utf-8')
 
+out_name = '1.dat';
 for wordfile in glob.glob(os.path.join(txt_path, '*.txt')):
     wordfile_path = os.path.abspath(wordfile)
+    out_name = '1'+out_name;
+    wf = open(out_name, 'w',encoding='utf-8')
     print ('process %s' % wordfile_path)
     f = open(wordfile_path, 'r')
     str=''
@@ -23,7 +25,7 @@ for wordfile in glob.glob(os.path.join(txt_path, '*.txt')):
     i=0;
     str="";
     for x in range(len(data)):
-        print(data[x])
+        #print(data[x])
         try:
             s=data[x]
             if (s.index('spi')>=0):
@@ -32,17 +34,19 @@ for wordfile in glob.glob(os.path.join(txt_path, '*.txt')):
             str=str+'  mem[{0}]<=8\'h{1}{2};'.format(t+i,s[13],s[14]) 
             
         except Exception as e:
+
             if (i>0):
                 str = 'mem[{0}]<=8\'d{1};'.format(t,i+1)+str+'\n'
                 t = t+i+1;
-                print(str)
+                #print(str)
                 wf.write(str)
                 str=''
             i = 0;
+            wf.write(s)
             pass
         else:
             pass
         finally:
             pass
         
-wf.close()
+    wf.close()

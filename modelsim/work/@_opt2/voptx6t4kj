@@ -1,0 +1,33 @@
+library verilog;
+use verilog.vl_types.all;
+entity spi_control is
+    generic(
+        fsm_idle        : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi0, Hi0, Hi0);
+        fsm_set_cnt     : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi0, Hi0, Hi1);
+        fsm_set_index   : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi0, Hi1, Hi0);
+        fsm_send_start  : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi0, Hi1, Hi1);
+        fsm_send_wait   : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi1, Hi0, Hi0);
+        fsm_send_end    : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi1, Hi0, Hi1);
+        fsm_finish      : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi1, Hi1, Hi0);
+        fsm_send_wait_2 : vl_logic_vector(0 to 7) := (Hi0, Hi0, Hi0, Hi0, Hi0, Hi1, Hi1, Hi1)
+    );
+    port(
+        rstn            : in     vl_logic;
+        clk             : in     vl_logic;
+        txdata          : in     vl_logic_vector(7 downto 0);
+        din             : in     vl_logic;
+        dout            : out    vl_logic;
+        cs              : out    vl_logic;
+        sck             : out    vl_logic;
+        rxdata          : out    vl_logic_vector(7 downto 0)
+    );
+    attribute mti_svvh_generic_type : integer;
+    attribute mti_svvh_generic_type of fsm_idle : constant is 1;
+    attribute mti_svvh_generic_type of fsm_set_cnt : constant is 1;
+    attribute mti_svvh_generic_type of fsm_set_index : constant is 1;
+    attribute mti_svvh_generic_type of fsm_send_start : constant is 1;
+    attribute mti_svvh_generic_type of fsm_send_wait : constant is 1;
+    attribute mti_svvh_generic_type of fsm_send_end : constant is 1;
+    attribute mti_svvh_generic_type of fsm_finish : constant is 1;
+    attribute mti_svvh_generic_type of fsm_send_wait_2 : constant is 1;
+end spi_control;
