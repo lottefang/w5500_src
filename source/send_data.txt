@@ -1,3 +1,18 @@
+ send udp destination ip and port
+Write_W5500_SOCK_4Byte
+**spi send 0x00
+**spi send 0x0c
+**spi send 0x0f
+**spi send 0xc0
+**spi send 0xa8
+**spi send 0x01
+**spi send 0xbe
+Write_W5500_SOCK_2Byte
+**spi send 0x00
+**spi send 0x10
+**spi send 0x0e
+**spi send 0x17
+**spi send 0x70
 Write_SOCK_Data_Buffer
 read offset 
 Read_W5500_SOCK_2Byte

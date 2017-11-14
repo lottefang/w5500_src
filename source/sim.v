@@ -14,7 +14,7 @@ module sim;
     // rst_n=1;
   end
   always #1 clk=~clk;
-  reg MISO;
+  reg MISO=1'b0;
   wire cs,sck,MOSI;
   top_module u(  clk,rst_n, led, MISO,
 	 MOSI,

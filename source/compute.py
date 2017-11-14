@@ -7,7 +7,7 @@ try:
 except OSError:
     pass
 output_path='F:\project\project\w5500\w5500_verilog_test\w5500_src\source'
-
+t=0;
 out_name = '1.dat';
 for wordfile in glob.glob(os.path.join(txt_path, '*.txt')):
     wordfile_path = os.path.abspath(wordfile)
@@ -21,7 +21,7 @@ for wordfile in glob.glob(os.path.join(txt_path, '*.txt')):
 
         data.append(line)
         #print(line)
-    t=0;
+    
     i=0;
     str="";
     for x in range(len(data)):

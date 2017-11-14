@@ -53,79 +53,100 @@ parameter   spi_fsm_idle        =   8'd0,
             spi_fsm_1_byte_fini =   8'd7,
             spi_fsm_1_block_fini=   8'd8,
             spi_fsm_finish      =   8'd9;
-reg [8:0] cur=spi_fsm_idle,nxt=spi_fsm_idle;
+reg [7:0] cur=spi_fsm_idle,nxt=spi_fsm_idle;
+
+parameter   tx_fsm_idle             =   8'd0;
+            tx_fsm_start            =   8'd1;
+            tx_fsm_write_ip          =   8'd2;
+            tx_fsm_write_port        =   8'd3;
+            tx_fsm_read_offset      =   8'd4;
+            tx_fsm_write_data       =   8'd5;
+            tx_fsm_judge            =   8'd6;
+            tx_fsm_write_data_again =   8'd7;
+            tx_fsm_write_offset     =   8'd8;
+            tx_fsm_write_send       =   8'd9;
+            tx_fsm_finish           =   9'd10;
+reg [7:0]   cur=spi_fsm_idle,nxt=spi_fsm_idle;
+reg [7:0]   tx_cur = tx_fsm_idle,   tx_nxt  = tx_fsm_idle;
 
 parameter init_reg_num = 84;
 
 reg [7:0] treg;
-reg [7:0] cnt=0,index=0;
-
+reg [7:0] index=0;
+reg [15:0] cnt=0;
 reg [7:0] mem[255:0];
-//----init_done 是否初始化完成
-reg init_done = 1'b0;
-always @(posedge clk or negedge rstn) begin
-  if(!rstn) 
-    init_done<=1'b0;
-  else if ((index == init_reg_num) &&( cur == spi_fsm_1_byte_fini )) 
-    init_done <= 1'b1;
+reg [7:0] ram[2047:0]; //tx 缓存区
+reg [10:0] tx_ram_start = 0, tx_ram_end = 0, tx_count = 0;
+assign tx_count = tx_ram_end > tx_ram_start ? (tx_ram_end - tx_ram_start): (12'd2048-tx_ram_start+tx_ram_end);//tx缓存区字节数量
+//tx缓存区fifo 入
+always @(posedge clk_sink or negedge rstn) begin
+    if(!rstn) begin
+        tx_ram_end<=0;
+    end else begin 
+        ram[tx_ram_end]<=txdata;
+        tx_ram_end<=tx_ram_end+1'b1;
+    end 
+end
+//tx缓存区FIFO 出
+always @(posedge clk or negedge rstn ) begin
+    if (!rstn) tx_ram_start <=0;
+    else if (index == 8'd109 && cur == spi_fsm_set_ptr)
+        tx_ram_start <= tx_ram_start +1'b1;
 end
 
-//-----spi要发送de数据
-always @(index) begin
-  treg  = mem[index];
-end
+
+
 
 //spi 状态机状态转换
 wire spi_done;
-reg start=0;
 reg index_add_flag;
-always @(cur or init_done or spi_done) 
+always @(cur or init_done or spi_done or cnt) 
     begin
         nxt=cur;
         case(cur)
-            spi_fsm_idle:
+            spi_fsm_idle:   //idle
                 begin
-                if (!init_done) nxt = spi_fsm_set_cnt ;
+                if ((!init_done)||(busy_tx)) nxt = spi_fsm_set_cnt ;
                 end
-            spi_fsm_set_cnt:
+            spi_fsm_set_cnt:    //设置本次spi传输字节个数，置低cs
                 begin
                   nxt   =  spi_fsm_set_ptr ;
                 end
-            spi_fsm_set_ptr :
+            spi_fsm_set_ptr :   //设置传输数据的指针
                 begin
                   nxt   =   spi_fsm_set_tx_data;
                 end     
-            spi_fsm_set_tx_data :
+            spi_fsm_set_tx_data ://设置spi传输数
                 begin
                   nxt = spi_fsm_spi_start; 
                 end
-            spi_fsm_spi_start  :
+            spi_fsm_spi_start  ://启动spi传输，传输一个字节
                 begin
                   nxt = spi_fsm_spi_wait;
                 end 
-            spi_fsm_spi_wait   :
+            spi_fsm_spi_wait   ://等待spi传输完成
                 begin
                   if (spi_done) nxt = spi_fsm_cnt_minus;
                 end
-            spi_fsm_cnt_minus   :
+            spi_fsm_cnt_minus   ://更新cnt和ptr
                 begin
                     nxt = spi_fsm_1_byte_fini;
                 end
-            spi_fsm_1_byte_fini:
+            spi_fsm_1_byte_fini://判断是否一帧数据传输完成
                 begin
                     if  (cnt == 0) 
                         nxt = spi_fsm_1_block_fini; 
                     else 
                         nxt = spi_fsm_set_ptr;
                 end
-            spi_fsm_1_block_fini:
+            spi_fsm_1_block_fini://判断时候需要传下一帧数据
                 begin
                     if  (!init_done) 
                         nxt = spi_fsm_set_cnt;
                     else 
                         nxt = spi_fsm_finish;
                 end
-            spi_fsm_finish :
+            spi_fsm_finish ://回到idle
                 begin
                     nxt = spi_fsm_idle;
                 end    
@@ -149,9 +170,18 @@ always@(posedge clk or negedge rstn) begin
     else 
     case (cur)
         spi_fsm_set_cnt:    
-            if (!init_done) cnt <= mem[index]-1'b1;
+            begin
+                if ((!init_done) || busy_tx) cnt <= mem[index]-1'b1;
+                if (busy_tx && tx_cur == tx_fsm_write_data) 
+                begin
+                    if (12'd2048-offset[10:0]>=tx_count) 
+                        cnt <= tx_count+3; 
+                    else 
+                        cnt <= 12'd2048-offset[10:0] +3;
+                end
+            end 
         spi_fsm_cnt_minus:
-            if (!init_done) cnt <= cnt -1'b1;
+            if ((!init_done) || busy_tx) cnt <= cnt -1'b1;
     endcase
 end
 
@@ -159,17 +189,24 @@ end
 always@(posedge clk or negedge rstn) begin
     if(!rstn) 
         index<=0;
-    else 
-    case(cur)
-        spi_fsm_set_ptr:
-            begin
-                if (!init_done) index <= index +1'b1;
-            end
-        spi_fsm_1_block_fini:
-            begin
-                if(!init_done)  index <= index +1'b1;
-            end
-    endcase
+    else   
+        case(cur)
+            spi_fsm_idle:
+                begin 
+                    if (busy_tx && tx_cur == tx_fsm_write_ip) index <= 8'd85;
+                    if (busy_tx && tx_cur == tx_fsm_write_data) index <= 8'd105;
+                    if (busy_tx && tx_cur == tx_fsm_write_send) index <= 8'd110;
+                end
+            spi_fsm_set_ptr:
+                begin
+                     if ((!init_done) || busy_tx) index <= index +1'b1;
+                     if (index == 8'd109) index<=8'd109;
+                end
+            spi_fsm_1_block_fini:
+                begin
+                     if ((!init_done) || busy_tx) index <= index +1'b1;
+                end
+        endcase   
 end
 
 //------w5500 cs
@@ -199,7 +236,7 @@ end
 wire[7:0] rreg;
 wire [31:0]mspi_rdata;
 wire mspi_ready;
-assign rxdata = mspi_rdata[7:0];
+
 mspi mspi_inst(
 					.clk(clk),		// global clock
 					.rst(~rstn),		// global async low reset
@@ -215,6 +252,111 @@ mspi mspi_inst(
 					.ss(),			// spi cs
 					.ready(mspi_ready)		// spi master ready (idle) 
 					);
+//------rx_reg 暂存spi接收到的byte
+reg[7:0]  rx_reg;
+always @(posedge spi_done) begin
+  rx_reg<=mspi_rdata[7:0];
+end
+reg[15:0] rx_reg_db;
+always @(posedge spi_done) begin
+    rx_reg_db <= {rx_reg_db[7:0],mspi_rdata[7:0]};
+end 
+
+//--------busy_tx
+always @(posedge clk or negedge rstn ) begin
+  if(!rstn) 
+        busy_tx <= 1'b0;
+    else begin
+
+        if (tx_start && (!busy_rx)) busy_tx <= 1'b1;
+        if (tx_cur ==  tx_fsm_finish) busy_tx<=1'b0;
+    end
+end
+//----init_done 是否初始化完成
+reg init_done = 1'b0;
+always @(posedge clk or negedge rstn) begin
+  if(!rstn) 
+    init_done<=1'b0;
+  else if ((index == init_reg_num) &&( cur == spi_fsm_1_byte_fini )) 
+    init_done <= 1'b1;
+end
+//-------tx_write_send_done
+reg tx_write_send_done=1'b0;
+always @(posedge clk or negedge rstn ) begin
+  if(!rstn) 
+        tx_write_send_done <= 1'b0;
+    else begin
+        if (index == 8'119 && cur == spi_fsm_1_byte_fini) tx_write_send_done <= 1'b1;
+        if (tx_cur == tx_fsm_idle) tx_write_send_done <= 1'b0;
+    end
+end
+//--------tx_write_ip_done
+reg tx_write_ip_done = 1'b0;
+always @(posedge clk or negedge rstn ) begin
+  if(!rstn) 
+        tx_write_ip_done <= 1'b0;
+    else begin
+        if (index == 8'd104 && cur == spi_fsm_1_byte_fini) tx_write_ip_done <= 1'b1;
+        if (tx_cur == tx_fsm_idle) tx_write_ip_done <= 1'b0;
+    end
+end
+//-------tx_offset
+reg [15:0] tx_offset
+always @(posedge clk or negedge rstn ) begin
+  if(!rstn) 
+       tx_offset <= 0;
+    else begin
+        if (tx_cur== tx_fsm_write_ip && cur == spi_fsm_1_byte_fini && index == 8'd104)  tx_offset <= rx_reg_db; 
+        if (tx_cur == tx_fsm_write_data && cur == spi_fsm_set_ptr && index == 8'd109) begin
+            tx_offset<=tx_offset+1'b1;
+        end 
+    end
+end
+//------tx_write_data_done
+reg tx_write_data_done=1'b0;
+always @(posedge clk or negedge rstn ) begin
+  if(!rstn) 
+       tx_write_data_done <= 1'b0;
+    else begin
+        if ((tx_cur == tx_fsm_judge || tx_cur == tx_fsm_write_ip) tx_write_data_done<=1'b0;
+        if (tx_cur == tx_fsm_write_data && cnt == 0 && cur == spi_fsm_1_byte_fini) tx_write_data_done<=1'b1;
+    end
+end
+//-----spi要发送de数据
+always @(index or tx_ram_start) begin
+    case(index)
+        8'd109: treg = ram[tx_ram_start-1'b1];
+        8'd106: treg = {5'b0000,offset[10:8]};
+        8'd107: treg = offset[7:0];
+        default:treg  = mem[index];
+
+    endcase
+    if (index == 8'd109)
+        treg = ram[tx_ram_start-1'b1];
+    else 
+        
+end
+//--------tx 状态机
+always @(posedge clk or negedge rstn) begin
+    if(!rstn) tx_cur <= tx_fsm_idle;
+    else tx_cur <= tx_nxt;
+end
+//------tx 状态机
+always @(cur or busy_tx or tx_write_ip_done or tx_write_data_done) begin
+    tx_nxt = tx_cur;
+    case (tx_cur)
+        tx_fsm_idle: if (busy_tx) tx_nxt = tx_fsm_start;
+        tx_fsm_start:   tx_nxt = tx_fsm_write_ip; 
+        tx_fsm_write_ip : if (tx_write_ip_done) tx_nxt = tx_fsm_write_data;
+        tx_fsm_write_data: if   (tx_write_data_done) tx_nxt =tx_fsm_judge;
+        tx_fsm_judge:if (tx_count==0) tx_nxt = tx_fsm_write_send ; else tx_nxt = tx_fsm_write_data;
+        tx_fsm_write_send: if (tx_write_send_done) tx_nxt = tx_fsm_finish;
+        tx_fsm_finish: tx_nxt = tx_fsm_idle;
+        
+
+    endcase
+end
+
 
 initial begin
 //每行配置的前4位是一字节总数，两字节地址，一字节控制，后面的字节是具体配置参数
@@ -255,5 +397,19 @@ mem[71]<=8'd8;  mem[72]<=8'h00;  mem[73]<=8'h0c;  mem[74]<=8'h0f;  mem[75]<=8'hc
 //设置目的主机ip
 mem[79]<=8'd6;  mem[80]<=8'h00;  mem[81]<=8'h10;  mem[82]<=8'h0e;  mem[83]<=8'h17;  mem[84]<=8'h70;
 //设置目的主机port
+
+
+mem[85]<=8'd8;  mem[86]<=8'h00;  mem[87]<=8'h0c;  mem[88]<=8'h0f;  mem[89]<=8'hc0;  mem[90]<=8'ha8;  mem[91]<=8'h01;  mem[92]<=8'hbe;
+mem[93]<=8'd6;  mem[94]<=8'h00;  mem[95]<=8'h10;  mem[96]<=8'h0e;  mem[97]<=8'h17;  mem[98]<=8'h70;
+//send udp destination ip and port
+mem[99]<=8'd6;  mem[100]<=8'h00;  mem[101]<=8'h24;  mem[102]<=8'h0a;  mem[103]<=8'h00;  mem[104]<=8'h00;
+//read offset 
+
+mem[105]<=8'd4;  mem[106]<=8'h00;  mem[107]<=8'h00;  mem[108]<=8'h14; mem[109]<=8'h00;
+//send tx data,106,107 代表地址,108控制位
+mem[110]<=8'd6;  mem[111]<=8'h00;  mem[112]<=8'h24;  mem[113]<=8'h0e;  mem[114]<=8'h09;  mem[115]<=8'hcc;
+//写offset
+mem[116]<=8'd5;  mem[117]<=8'h00;  mem[118]<=8'h01;  mem[119]<=8'h0d;  mem[120]<=8'h20;
+//写启动tx
 end
 endmodule
