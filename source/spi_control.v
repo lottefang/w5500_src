@@ -2,7 +2,7 @@
  * @Author: cuidajun 
  * @Date: 2017-11-03 17:17:21 
  * @Last Modified by: cuidajun
- * @Last Modified time: 2017-11-03 22:25:28
+ * @Last Modified time: 2017-11-16 17:15:44
  * @Description: 例程网络参数
     //网关：192.168.1.1
     //掩码:	255.255.255.0
@@ -46,6 +46,30 @@ output  reg clk_source;
 input       clk_sink;
 output      init_done;
 reg [7:0] rxdata;
+parameter  SPI_CLK_DIV_NUM = 8'd4;//4~255 divsion of clk,spi的时钟分频，必须大于4
+parameter  RX_START_CLK_DIV = 6; //clk的2^n分频，用于启动查询是否接受到数据
+                                //这里可能会有个问题，就是如果在一次查询间隔内，发送了两次数据，则rxdata的输出数据里可能会混杂第二次的ip信息没有剔除。不过考虑到网络的延迟时ms级别，这个查询时间间隔也是ms级别，所以5500应该会自动合并两次数据，不会出这个问题
+parameter  GATEWAY_IP = 32'hc0a80101;
+//设置网关(Gateway)的IP地址,Gateway_IP为4字节,自己定义 
+//使用网关可以使通信突破子网的局限，通过网关可以访问到其它子网或进入Internet
+parameter  MASK = 32'hffffff00;
+//设置子网掩码(MASK)值,SUB_MASK为4字节数组,自己定义
+//子网掩码用于子网运算
+parameter  PHY_ADDR = 48'h0c29ab7c0001;
+//设置物理地址,PHY_ADDR为6字节数组,自己定义,用于唯一标识网络设备的物理地址值
+//该地址值需要到IEEE申请，按照OUI的规定，前3个字节为厂商代码，后三个字节为产品序号
+//如果自己定义物理地址，注意第一个字节必须为偶数
+parameter  LOCAL_IP = 32'hc0a801c7;
+//设置本机的IP地址,IP_ADDR为4字节unsigned char数组,自己定义
+//注意，网关IP必须与本机IP属于同一个子网，否则本机将无法找到网关
+parameter  UDP_PORT = 16'h1388;
+//设置本机udp Port
+parameter TARGET_IP = 32'hc0a801be;
+//设置目的主机ip
+parameter TARGET_PORT = 16'h1770;
+//设置目的主机port
+
+
 parameter   spi_fsm_idle        =   8'd0,
             spi_fsm_set_cnt     =   8'd1,
             spi_fsm_set_ptr     =   8'd2,
@@ -305,7 +329,7 @@ wire mspi_ready;
 mspi mspi_inst(
 					.clk(clk),		// global clock
 					.rst(~rstn),		// global async low reset
-					.clk_div(4),	// spi clock divider
+					.clk_div(SPI_CLK_DIV_NUM),	// spi clock divider
 					.wr(spi_start),			// spi write/read
 					.wr_len(2'd0),		// spi write or read byte number
 					.wr_done(spi_done),	// write done /read done
@@ -541,7 +565,7 @@ always @(posedge clk or negedge rstn) begin
 end
 //-------delay
 wire clk_1S;
-clk_divider  #(.CLK_DIVIDE_PARAM(10)) clk_generate2
+clk_divider  #(.CLK_DIVIDE_PARAM(RX_START_CLK_DIV)) clk_generate2
 				(
 					.clk(clk),
 					.clk_div(clk_1S)
@@ -627,21 +651,23 @@ initial begin
 
 mem[0]<=8'd5;  mem[1]<=8'h00;  mem[2]<=8'h2e;  mem[3]<=8'h01;  mem[4]<=8'h00;
 //查询是否接入互联网（插网线了没，如果没有，我也没处理。。。）
+mem[5]<=8'd8;  mem[6]<=8'h00;  mem[7]<=8'h01;  mem[8]<=8'h04; {mem[9],mem[10],mem[11],mem[12]}<=LOCAL_IP;
 
-mem[5]<=8'd8;  mem[6]<=8'h00;  mem[7]<=8'h01;  mem[8]<=8'h04;  mem[9]<=8'hc0;  mem[10]<=8'ha8;  mem[11]<=8'h01;  mem[12]<=8'h01;
+//mem[5]<=8'd8;  mem[6]<=8'h00;  mem[7]<=8'h01;  mem[8]<=8'h04;  mem[9]<=8'hc0;  mem[10]<=8'ha8;  mem[11]<=8'h01;  mem[12]<=8'h01;
 //设置网关(Gateway)的IP地址,Gateway_IP为4字节,自己定义 
 //使用网关可以使通信突破子网的局限，通过网关可以访问到其它子网或进入Internet
 
-mem[13]<=8'd8;  mem[14]<=8'h00;  mem[15]<=8'h05;  mem[16]<=8'h04;  mem[17]<=8'hff;  mem[18]<=8'hff;  mem[19]<=8'hff;  mem[20]<=8'h00;
+mem[13]<=8'd8;  mem[14]<=8'h00;  mem[15]<=8'h05;  mem[16]<=8'h04; {mem[17],mem[18],mem[19],mem[20]}<=MASK;
+//mem[13]<=8'd8;  mem[14]<=8'h00;  mem[15]<=8'h05;  mem[16]<=8'h04;  mem[17]<=8'hff;  mem[18]<=8'hff;  mem[19]<=8'hff;  mem[20]<=8'h00;
 //设置子网掩码(MASK)值,SUB_MASK为4字节数组,自己定义
 //子网掩码用于子网运算
 
-mem[21]<=8'd10;  mem[22]<=8'h00;  mem[23]<=8'h09;  mem[24]<=8'h04;  mem[25]<=8'h0c;  mem[26]<=8'h29;  mem[27]<=8'hab;  mem[28]<=8'h7c;  mem[29]<=8'h00;  mem[30]<=8'h01;
+mem[21]<=8'd10;  mem[22]<=8'h00;  mem[23]<=8'h09;  mem[24]<=8'h04;  {mem[25],mem[26],mem[27],mem[28],mem[29],mem[30]}<=PHY_ADDR;
 //设置物理地址,PHY_ADDR为6字节数组,自己定义,用于唯一标识网络设备的物理地址值
 //该地址值需要到IEEE申请，按照OUI的规定，前3个字节为厂商代码，后三个字节为产品序号
 //如果自己定义物理地址，注意第一个字节必须为偶数
 
-mem[31]<=8'd8;  mem[32]<=8'h00;  mem[33]<=8'h0f;  mem[34]<=8'h04;  mem[35]<=8'hc0;  mem[36]<=8'ha8;  mem[37]<=8'h01;  mem[38]<=8'hc7;
+mem[31]<=8'd8;  mem[32]<=8'h00;  mem[33]<=8'h0f;  mem[34]<=8'h04;  {mem[35],mem[36],  mem[37],mem[38]}<=LOCAL_IP;
 //设置本机的IP地址,IP_ADDR为4字节unsigned char数组,自己定义
 //注意，网关IP必须与本机IP属于同一个子网，否则本机将无法找到网关
 
@@ -657,14 +683,22 @@ mem[61]<=8'd5;  mem[62]<=8'h00;  mem[63]<=8'h00;  mem[64]<=8'h0d;  mem[65]<=8'h0
 mem[66]<=8'd5;  mem[67]<=8'h00;  mem[68]<=8'h01;  mem[69]<=8'h0d;  mem[70]<=8'h01;
 //开启udp
 
-mem[71]<=8'd8;  mem[72]<=8'h00;  mem[73]<=8'h0c;  mem[74]<=8'h0f;  mem[75]<=8'hc0;  mem[76]<=8'ha8;  mem[77]<=8'h01;  mem[78]<=8'hbe;
+// mem[71]<=8'd8;  mem[72]<=8'h00;  mem[73]<=8'h0c;  mem[74]<=8'h0f;  mem[75]<=8'hc0;  mem[76]<=8'ha8;  mem[77]<=8'h01;  mem[78]<=8'hbe;
+// //设置目的主机ip
+// mem[79]<=8'd6;  mem[80]<=8'h00;  mem[81]<=8'h10;  mem[82]<=8'h0e;  mem[83]<=8'h17;  mem[84]<=8'h70;
+// //设置目的主机port
+
+
+mem[71]<=8'd8;  mem[72]<=8'h00;  mem[73]<=8'h0c;  mem[74]<=8'h0f; { mem[75], mem[76],mem[77],mem[78]}<=TARGET_IP;
 //设置目的主机ip
-mem[79]<=8'd6;  mem[80]<=8'h00;  mem[81]<=8'h10;  mem[82]<=8'h0e;  mem[83]<=8'h17;  mem[84]<=8'h70;
+mem[79]<=8'd6;  mem[80]<=8'h00;  mem[81]<=8'h10;  mem[82]<=8'h0e; { mem[83],  mem[84]}<=TARGET_PORT;
 //设置目的主机port
 
 
-mem[85]<=8'd8;  mem[86]<=8'h00;  mem[87]<=8'h0c;  mem[88]<=8'h0f;  mem[89]<=8'hc0;  mem[90]<=8'ha8;  mem[91]<=8'h01;  mem[92]<=8'hbe;
-mem[93]<=8'd6;  mem[94]<=8'h00;  mem[95]<=8'h10;  mem[96]<=8'h0e;  mem[97]<=8'h17;  mem[98]<=8'h70;
+mem[85]<=8'd8;  mem[86]<=8'h00;  mem[87]<=8'h0c;  mem[88]<=8'h0f; { mem[89], mem[90],mem[91],mem[92]}<=TARGET_IP;
+mem[93]<=8'd6;  mem[94]<=8'h00;  mem[95]<=8'h10;  mem[96]<=8'h0e;  {mem[97], mem[98]}<=TARGET_PORT;
+// mem[85]<=8'd8;  mem[86]<=8'h00;  mem[87]<=8'h0c;  mem[88]<=8'h0f;  mem[89]<=8'hc0;  mem[90]<=8'ha8;  mem[91]<=8'h01;  mem[92]<=8'hbe;
+// mem[93]<=8'd6;  mem[94]<=8'h00;  mem[95]<=8'h10;  mem[96]<=8'h0e;  mem[97]<=8'h17;  mem[98]<=8'h70;
 //send udp destination ip and port
 mem[99]<=8'd6;  mem[100]<=8'h00;  mem[101]<=8'h24;  mem[102]<=8'h0a;  mem[103]<=8'h00;  mem[104]<=8'h00;
 //read offset 

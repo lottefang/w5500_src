@@ -42,7 +42,7 @@ r1
 Z23 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/w5500_src/source/clk_divider.v|
 Z24 !s102 -nocovercells
 Z25 o-work work -nocovercells -L mtiAvm -L mtiOvm -L mtiUvm -L mtiUPF
-Z26 !s108 1510821196.214000
+Z26 !s108 1510822555.606000
 Z27 !s107 F:/project/project/w5500/w5500_verilog_test/w5500_src/source/clk_divider.v|
 !s85 0
 vmspi
@@ -58,7 +58,7 @@ R22
 r1
 !s85 0
 31
-!s108 1510821197.479000
+!s108 1510822556.808000
 !s107 F:/project/project/w5500/w5500_verilog_test/w5500_src/source/mspi.v|
 Z34 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/w5500_src/source/mspi.v|
 R24
@@ -78,7 +78,7 @@ r1
 Z41 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/w5500_src/source/sim.v|
 R24
 R25
-Z42 !s108 1510821196.355000
+Z42 !s108 1510822555.763000
 Z43 !s107 F:/project/project/w5500/w5500_verilog_test/w5500_src/source/sim.v|
 !s85 0
 vspi_control
@@ -114,7 +114,7 @@ r1
 Z59 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_master.v|
 R24
 R25
-Z60 !s108 1510821196.715000
+Z60 !s108 1510822556.007000
 Z61 !s107 F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_master.v|
 !s85 0
 vspi_slave
@@ -132,7 +132,7 @@ r1
 Z68 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_slave.v|
 R24
 R25
-Z69 !s108 1510821196.904000
+Z69 !s108 1510822556.212000
 Z70 !s107 F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_slave.v|
 !s85 0
 vTB_SPI_MasSlv
@@ -151,24 +151,24 @@ Z76 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:/project/project/w
 R24
 R25
 Z77 n@t@b_@s@p@i_@mas@slv
-Z78 !s108 1510821197.084000
+Z78 !s108 1510822556.379000
 Z79 !s107 F:/project/project/w5500/w5500_verilog_test/w5500_src/source/TB_SPI_MasSlv.v|
 !s85 0
 vtop_module
-Z80 I0oFU]^JR`g=Em0eCP2Pfg1
-Z81 VAT^R1aJCId=U8flf7j55o3
+Z80 !s100 0U@ZScN3YkhQ3LE;@>bDz2
+Z81 IGbniWW=nUL`YeM]KfgOGV3
+Z82 VAT^R1aJCId=U8flf7j55o3
 R18
-Z82 w1510821191
-Z83 8F:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v
-Z84 FF:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v
-L0 1
+Z83 w1510822195
+Z84 8F:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v
+Z85 FF:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v
+L0 9
 R22
 r1
 31
-Z85 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v|
+Z86 !s90 -reportprogress|300|-work|work|-vopt|-nocovercells|F:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v|
 R24
 R25
-Z86 !s100 kNjzMJE?PkeIjOhbLLSkO2
 !s85 0
-Z87 !s108 1510821197.254000
+Z87 !s108 1510822556.567000
 Z88 !s107 F:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v|

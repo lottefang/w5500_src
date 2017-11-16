@@ -1,9 +1,9 @@
-F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_control.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_control.v
+F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_control.v {0 vlog\ -work\ work\ -vopt\ -nocovercells\ F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_control.v\nModel\ Technology\ ModelSim\ SE-64\ vlog\ 10.0c\ Compiler\ 2011.07\ Jul\ 21\ 2011\n--\ Compiling\ module\ spi_control\n**\ Error:\ F:/project/project/w5500/w5500_verilog_test/w5500_src/source/spi_control.v(689):\ near\ \"\;\":\ syntax\ error,\ unexpected\ '\;',\ expecting\ ','\ or\ '\}'\n\n {4.0 5.0} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/top_module.v {1 {vlog -work work -vopt -nocovercells {F:\project\project\w5500\w5500_verilog_test\w5500_src\source\top_module.v}
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011
--- Compiling module spi_control
+-- Compiling module top_module
 
 Top level modules:
-	spi_control
+	top_module
 
 } {} {}} F:/project/project/w5500/w5500_verilog_test/w5500_src/source/clk_divider.v {1 {vlog -work work -vopt -nocovercells F:/project/project/w5500/w5500_verilog_test/w5500_src/source/clk_divider.v
 Model Technology ModelSim SE-64 vlog 10.0c Compiler 2011.07 Jul 21 2011

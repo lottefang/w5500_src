@@ -1,0 +1,39 @@
+# Current time Thu Nov 16 16:56:06 2017
+# ModelSim Stack Trace
+# Program = vish
+# Id = "10.0c"
+# Version = "2011.07"
+# Date = "Jul 21 2011"
+# Platform = win64
+
+Exception c0000005 has occurred at address 402bf7cb. Traceback:
+# 0    0x402bf7cb: 'Ucdb_Init + 0x89b5b'
+# 1    0x0eab5ba0: '<unknown (@0xeab5ba0)>'
+# 2    0x056d8a60: '<unknown (@0x56d8a60)>'
+# 3    0x00000009: '<unknown (@0x9)>'
+# 4    0x00000009: '<unknown (@0x9)>'
+# 5    0x00000001: '<unknown (@0x1)>'
+# 6    0x40285c6a: 'Ucdb_Init + 0x4fffa'
+# 7    0x402c056f: 'Ucdb_Init + 0x8a8ff'
+# 8    0x402c060d: 'Ucdb_Init + 0x8a99d'
+# 9    0x00000001: '<unknown (@0x1)>'
+# 10   0x0ea7b4c0: '<unknown (@0xea7b4c0)>'
+# 11   0x0ea959b0: '<unknown (@0xea959b0)>'
+# 12   0x02db7df0: '<unknown (@0x2db7df0)>'
+# 13   0x005f8d00: '<unknown (@0x5f8d00)>'
+# 14   0x402bcc8d: 'Ucdb_Init + 0x8701d'
+# 15   0x402bcc7f: 'Ucdb_Init + 0x8700f'
+# 16   0x402bccfc: 'Ucdb_Init + 0x8708c'
+# 17   0x0e780010: '<unknown (@0xe780010)>'
+# 18   0x005f8e10: '<unknown (@0x5f8e10)>'
+# 19   0x67b9d790: '_badioinfo + 0x1d0'
+# 20   0x67b9cad0: 'tzname + 0x30'
+# 21   0x005f8e20: '<unknown (@0x5f8e20)>'
+# 22   0x10073c00: 'Tcl_ArrayObjCmd + 0x980'
+# 23   0x00000003: '<unknown (@0x3)>'
+# 24   0x00000020: '<unknown (@0x20)>'
+# 25   0x67b5cb87: 'malloc + 0x5b'
+# 26   0x00000020: '<unknown (@0x20)>'
+StackWalk failed 487
+# End of Stack Trace
+

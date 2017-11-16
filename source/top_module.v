@@ -3,7 +3,7 @@
  * @Date: 2017-11-16 16:34:52 
  * @Last Modified by: cuidajun
  * @Last Modified time: 2017-11-16 16:37:39
- * @Description:  这是一个调用w5500模块的例程，将收到的数据发回去
+ * @Description:  这是一个调用w5500模块spi_ctrl的例程，将收到的数据发回去
  */
 
 module top_module
