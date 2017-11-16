@@ -1,3 +1,11 @@
+/*
+ * @Author: cuidajun 
+ * @Date: 2017-11-16 16:34:52 
+ * @Last Modified by: cuidajun
+ * @Last Modified time: 2017-11-16 16:37:39
+ * @Description:  这是一个调用w5500模块的例程，将收到的数据发回去
+ */
+
 module top_module
 (
    input clk,
@@ -11,11 +19,10 @@ module top_module
 	output mspi_sck
 );
 reg myrstn = 1'b1;
-assign led[0]=~myrstn;
+
 
 wire [7:0]rxdata;
 wire clk2;
-assign led[1]=rxdata[0];
 
 assign clk2 = clk;
 
@@ -34,35 +41,46 @@ clk_divider  #(.CLK_DIVIDE_PARAM(1)) clk_generate
 				);
 				
 
-
+reg[7:0] txdata;
+wire busy, busy_tx , busy_rx,clk_rx,init_done;
+reg clk_sink,tx_start;
 spi_control  spi_ctrl_inst
 		(
 		.rstn(myrstn),
 		.clk(clk_div),
-		.txdata(),
+		.txdata(rxdata),
+		.tx_start(tx_start),
+		.clk_sink(clk_rx),
+		.busy(busy),       //这个没用
+		.busy_tx(busy_tx),    //！！注意，busy_tx高时正在发送数据忙，忙时不可继续增加发送数据缓存区，全部发送完后不忙	
+		.busy_rx(busy_rx),
 		.din(MISO),
 		.dout(MOSI),
 		.cs(cs),
 		.sck(sck),
-		.rxdata(rxdata)
+		.rxdata(rxdata),
+		.clk_source(clk_rx),
+		.init_done(init_done)
 		);
-wire spi_done;
-wire [31:0] mspi_rdata;
-wire mspi_mosi,mspi_ready;
-mspi mspi_inst(
-					.clk(clk),		// global clock
-					.rst(~myrstn),		// global async low reset
-					.clk_div(4),	// spi clock divider
-					.wr(clk_div),			// spi write/read
-					.wr_len(2'd0),		// spi write or read byte number
-					.wr_done(mspi_done),	// write done /read done
-					.wrdata({8'h77,24'd0}),		// spi write data, 锟斤拷效位锟斤拷wr_len锟叫关ｏ拷锟斤拷8位锟斤拷锟斤拷16位锟斤拷全锟斤拷32位 
-					.rddata(mspi_rdata),		// spi recieve data, valid when wr_done assert锟斤拷效位锟斤拷wr_len锟叫关ｏ拷锟斤拷8位锟斤拷锟斤拷16位锟斤拷全锟斤拷32位 
-					.sck(mspi_sck),		// spi master clock out 
-					.sdi(1'b1),		// spi master data in (MISO) 
-					.sdo(mspi_mosi),		// spi master data out (MOSI) 
-					.ss(),			// spi cs
-					.ready(mspi_ready)		// spi master ready (idle) 
-					);
+//产生开始发送数据的start信号
+wire clk_1S;
+clk_divider  #(.CLK_DIVIDE_PARAM(15)) clk_generate2
+				(
+					.clk(clk_div),
+					.clk_div(clk_1S)
+				);
+reg clk_1S_delay;
+always @(posedge clk_div ) begin
+  clk_1S_delay<=clk_1S;
+end
+always @(posedge clk_div or negedge myrstn) begin
+	if (!myrstn) begin
+		tx_start <= 1'b0;
+	end else 
+				if ({clk_1S_delay, clk_1S}==2'b01) begin
+					tx_start <= 1;
+				end  else tx_start<=1'b0;
+end
+assign led[1] = busy_tx;
 
 endmodule

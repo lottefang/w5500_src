@@ -6,13 +6,27 @@ module top_module
 	input MISO,
 	output MOSI,
 	output cs,
-	output sck
-
+	output sck,
+	output clk_div,
+	output mspi_sck
 );
-assign led[0]=1'b1;
-assign led[1]=rxdata[0];
+reg myrstn = 1'b1;
+assign led[0]=~myrstn;
+
 wire [7:0]rxdata;
-wire  clk_div;
+wire clk2;
+assign led[1]=clk_1S;
+
+assign clk2 = clk;
+
+parameter rstn_cnt = 100;
+reg [31:0] cnt=0;
+always @(posedge clk ) begin
+  
+  if (cnt== (rstn_cnt>>1)) begin myrstn<=1'b0; cnt<=cnt+1'b1;end 
+  else if (cnt==rstn_cnt) myrstn<=1'b1; 
+  else cnt<=cnt+1'b1;
+end
 clk_divider  #(.CLK_DIVIDE_PARAM(1)) clk_generate
 				(
 					.clk(clk),
@@ -20,18 +34,79 @@ clk_divider  #(.CLK_DIVIDE_PARAM(1)) clk_generate
 				);
 				
 
-
+reg[7:0] txdata;
+wire busy, busy_tx , busy_rx,clk_rx,init_done;
+reg clk_sink,tx_start;
 spi_control  spi_ctrl_inst
 		(
-		.rstn(rstn),
+		.rstn(myrstn),
 		.clk(clk_div),
-		.txdata(),
+		.txdata(txdata),
+		.tx_start(tx_start),
+		.clk_sink(clk_sink),
+		.busy(busy),       //模块忙，正在接受数据或者发送数据，本模块为半双�  	
+		.busy_tx(busy_tx),    //正在发送数据，忙时不可继续增加发送数据缓存区，全部发送完后不�  	
+		.busy_rx(busy_rx),
 		.din(MISO),
 		.dout(MOSI),
 		.cs(cs),
 		.sck(sck),
-		.rxdata(rxdata)
+		.rxdata(rxdata),
+		.clk_source(clk_rx),
+		.init_done(init_done)
 		);
 
+
+
+reg [7:0] cur,tx_cnt;
+wire clk_1S;
+clk_divider  #(.CLK_DIVIDE_PARAM(10)) clk_generate2
+				(
+					.clk(clk_div),
+					.clk_div(clk_1S)
+				);
+reg clk_1S_delay;
+always @(posedge clk_div ) begin
+  clk_1S_delay<=clk_1S;
+end
+always @(posedge clk_div or negedge myrstn) begin
+	if (!myrstn) begin
+	   	cur <=0;
+		clk_sink<=0;
+		tx_start<=0;
+		tx_cnt <=0;
+	end else begin
+			// $display("busytx=%b,initdone=%b",busy_tx,init_done);
+			if ((!busy_tx)&&init_done) begin
+			// $display("enter top tx fsm");
+			case (cur )
+
+			0:cur <=1;
+			1:begin
+				txdata <= 8'd65+tx_cnt ;
+				clk_sink <=1'b0;
+				cur<=2;
+			end  
+			2:begin
+				clk_sink<=1'b1;
+				tx_cnt<=tx_cnt+1;
+				if (tx_cnt>10) cur <=3; else  cur <=1;
+			end
+			3:begin
+				if ({clk_1S_delay, clk_1S}==2'b01) begin
+					tx_start <= 1;
+					cur <=4;
+				end 
+			end 
+			4: begin 
+				cur<=0;
+				tx_cnt<=0;
+				tx_start<=0;
+			end 
+			
+		endcase
+		end 
+	end 
+end
 
 endmodule

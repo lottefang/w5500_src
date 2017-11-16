@@ -1,0 +1,81 @@
+Read_W5500_1Byte
+**spi send 0x00
+**spi send 0x17
+**spi send 0x01
+**spi send 0x00
+int register:1
+enter interupt
+read Sn_IR
+Read_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x02
+**spi send 0x09
+**spi send 0x00
+write Sn_IR = 0x04
+Write_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x02
+**spi send 0x0d
+**spi send 0x04
+receive data
+Read_W5500_1Byte
+**spi send 0x00
+**spi send 0x17
+**spi send 0x01
+**spi send 0x00
+read rx_size
+Read_W5500_SOCK_2Byte
+**spi send 0x00
+**spi send 0x26
+**spi send 0x0a
+**spi send 0x00
+**spi send 0x00
+rx_size = 11 
+read offset
+Read_W5500_SOCK_2Byte
+**spi send 0x00
+**spi send 0x28
+**spi send 0x0a
+**spi send 0x00
+**spi send 0x00
+offset = 0x0000
+set cs ,send offset , control byte,and then data
+**spi send 0x00
+**spi send 0x00
+**spi send 0x18
+**spi send 0x00
+receive:0xc0
+**spi send 0x00
+receive:0xa8
+**spi send 0x00
+receive:0x01
+**spi send 0x00
+receive:0xbe
+**spi send 0x00
+receive:0x17
+**spi send 0x00
+receive:0x70
+**spi send 0x00
+receive:0x00
+**spi send 0x00
+receive:0x03
+**spi send 0x00
+receive:0x61
+**spi send 0x00
+receive:0x61
+**spi send 0x00
+receive:0x61
+spi set offset
+Write_W5500_SOCK_2Byte
+**spi send 0x00
+**spi send 0x28
+**spi send 0x0e
+**spi send 0x00
+**spi send 0x0b
+spi set recv
+Write_W5500_SOCK_1Byte
+**spi send 0x00
+**spi send 0x01
+**spi send 0x0d
+**spi send 0x40
+end
